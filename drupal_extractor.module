@@ -3,22 +3,42 @@
 use Drupal\drupal_extractor\Extractors\Entities;
 
 //1°
-function drupal_extractor_preprocess_node (&$variables){
+/**
+ * drupal_extractor_preprocess_html
+ *
+ * @param [type] $variables
+ * @author chr1sp1n-dev <chr1sp1n.dev@gmail.com>
+ */
+function drupal_extractor_preprocess_node(&$variables) {
 
 }
 
 //2°
-function drupal_extractor_preprocess_html(&$variables){
+/**
+ * drupal_extractor_preprocess_html
+ *
+ * @param [type] $variables
+ * @author chr1sp1n-dev <chr1sp1n.dev@gmail.com>
+ */
+function drupal_extractor_preprocess_html(&$variables) {
 
 }
 
 //3°
-function drupal_extractor_preprocess_page(&$variables){
+/**
+ * drupal_extractor_preprocess_page
+ *
+ * @param [type] $variables
+ * @author chr1sp1n-dev <chr1sp1n.dev@gmail.com>
+ */
+function drupal_extractor_preprocess_page(&$variables) {
 
-  $data = Entities\Node::get($variables);
-
-  $variables['node_fields'] = $data;
-
-  var_dump($variables['node_fields']);
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if ($node instanceof \Drupal\node\NodeInterface) {
+    $data = Entities\Node::get();
+    $variables['node_fields'] = $data;
+    var_dump($variables['node_fields']);
+    var_dump('TEST');
+  }
 
 }

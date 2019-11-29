@@ -20,14 +20,15 @@ class Node {
    *
    * @param string $language_code
    * @param array $fieldsExcluded
+   * @return object
    *
    * @author chr1sp1n-dev <chr1sp1n.dev@gmail.com>
    */
-  public static function get(&$variables, string $languageCode = null, array $fieldsExcluded = []){
+  public static function get(string $languageCode = null, array $fieldsExcluded = []){
 
     $node = \Drupal::routeMatch()->getParameter('node');
     if (!$node instanceof \Drupal\node\NodeInterface) {
-      return;
+      return null;
     }
 
     $languageCode = $languageCode ? $languageCode : Utility\Language::current();
@@ -44,7 +45,9 @@ class Node {
         $typeName = $field->getFieldDefinition()->getType();
         $method = Utility\Normalizer::methodName($typeName);
         if( method_exists( '\Drupal\drupal_extractor\Extractors\Fields', $method ) ){
-          $data->{$fieldName} = Fields::$method($field, $languageCode);
+          if($value = Fields::$method($field, $languageCode)){
+            $data->{$fieldName} = $value;
+          }
         }
       }
     }

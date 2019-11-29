@@ -12,7 +12,9 @@ class Fields {
 
   public static function file($field){
     if( $rawValues = self::getRawValues($field) ){
-      $values = [];
+      $return = new \stdClass();
+      $return->values = [];
+      $return->field = self::getFieldData($field);
       foreach ($rawValues as $value) {
         if(!isset($value['target_id'])) continue;
         $file = \Drupal\file\Entity\File::load($value['target_id']);
@@ -26,11 +28,11 @@ class Fields {
           if(isset($value['alt'])) $fields->alt = $value['alt'];
           if(isset($value['width'])) $fields->width = $value['width'];
           if(isset($value['height'])) $fields->height = $value['height'];
-          $values[] = $fields;
+          $return->values[] = $fields;
         }
       }
     }
-    return empty($values) ? NULL : $values;
+    return empty($values) ? NULL : $return;
   }
 
   public static function image($field){
@@ -39,29 +41,35 @@ class Fields {
 
   public static function link($field){
     if( $rawValues = self::getRawValues($field) ){
-      $values = [];
+      $return = new \stdClass();
+      $return->values = [];
+      $return->field = self::getFieldData($field);
     }
-    return empty($values) ? NULL : $values;
+    return empty($return->values) ? NULL : $return;
   }
 
   public static function integer($field){
     if( $rawValues = self::getRawValues($field) ){
-      $values = [];
+      $return = new \stdClass();
+      $return->field = self::getFieldData($field);
+      $return->values = [];
       foreach ($rawValues as $key => $value) {
-        if(isset($value['value'])) $values[] = (int) $value['value'];
+        if(isset($value['value'])) $return->values[] = (int) $value['value'];
       }
     }
-    return empty($values) ? NULL : $values;
+    return empty($return->values) ? NULL : $return;
   }
 
   public static function string($field){
     if( $rawValues = self::getRawValues($field) ){
-      $values = [];
+      $return = new \stdClass();
+      $return->field = self::getFieldData($field);
+      $return->values = [];
       foreach ($rawValues as $key => $value) {
-        if(isset($value['value'])) $values[] = $value['value'];
+        if(isset($value['value'])) $return->values[] = $value['value'];
       }
     }
-    return empty($values) ? NULL : $values;
+    return empty($return->values) ? NULL : $return;
   }
 
   public static function stringLong($field){
@@ -70,12 +78,14 @@ class Fields {
 
   public static function boolean($field){
     if( $rawValues = self::getRawValues($field) ){
-      $values = [];
+      $return = new \stdClass();
+      $return->field = self::getFieldData($field);
+      $return->values = [];
       foreach ($rawValues as $key => $value) {
-        if(isset($value['value'])) $values[] = ( $value['value'] == '1' ? TRUE : FALSE );
+        if(isset($value['value'])) $return->values[] = ( $value['value'] == '1' ? TRUE : FALSE );
       }
     }
-    return empty($values) ? NULL : $values;
+    return empty($return->values) ? NULL : $return;
   }
 
   public static function textLong($field){
@@ -84,7 +94,9 @@ class Fields {
 
   public static function textWithSummary($field){
     if( $rawValues = self::getRawValues($field) ){
-      $values = [];
+      $return = new \stdClass();
+      $return->field = self::getFieldData($field);
+      $return->values = [];
       foreach ($rawValues as $value) {
         if(isset($value['value']) || isset($value['summary']) || isset($value['format'])){
           $fields = new \stdClass();
@@ -92,38 +104,39 @@ class Fields {
           if(isset($value['summary'])) $fields->summary = $value['summary'];
           if(isset($value['format'])) $fields->format = $value['format'];
         }
-        if(isset($fields)) $values[] = $fields;
+        if(isset($fields)) $return->values[] = $fields;
         unset($fields);
       }
     }
-    return empty($values) ? NULL : $values;
+    return empty($return->values) ? NULL : $return;
   }
 
   public static function paragraph($field){
     if( $rawValues = self::getRawValues($field) ){
-      $values = [];
+      $return = new \stdClass();
+      $return->field = self::getFieldData($field);
+      $return->values = [];
     }
-    return empty($values) ? NULL : $values;
+    return empty($return->values) ? NULL : $return;
   }
 
   public static function entityReference($field){
     if( $rawValues = self::getRawValues($field) ){
-      $values = [];
-      $values = [];
-      foreach ($rawValues as $key => $value) {
-        $fields = new \stdClass();
-        $fields->target_id = $value;
-      }
+      $return = new \stdClass();
+      $return->field = self::getFieldData($field);
+      $return->values = [];
     }
-    return empty($values) ? NULL : $values;
+    return empty($return->values) ? NULL : $return;
   }
 
   /*********************************************/
 
   /**
-   * Undocumented function
+   * Get field raw values
    *
    * @param [type] $field
+   * @return array
+   *
    * @author chr1sp1n-dev <chr1sp1n.dev@gmail.com>
    */
   private static function getRawValues($field){
@@ -134,5 +147,30 @@ class Fields {
     return !is_null($values) && is_array($values) ? $values : NULL;
   }
 
+  /**
+   * Get field definitions ed data
+   *
+   * @param [type] $field
+   * @return object
+   *
+   * @author chr1sp1n-dev <chr1sp1n.dev@gmail.com>
+   */
+  private static function getFieldData($field){
+    $definitions = $field->getFieldDefinition();
+    $field = new \stdClass();
+    $field->name = $definitions->getName();
+    $field->type = $definitions->getType();
+    if($return = $definitions->getLabel()){
+      if($return instanceof \Drupal\Core\StringTranslation\TranslatableMarkup){
+        $field->label = $return->render();
+      }else{
+        $field->label = $return;
+      }
+    }
+    if($return = $definitions->getDescription()){
+      $field->description = $return->render();
+    }
+    return $field;
+  }
 
 }
