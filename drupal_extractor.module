@@ -1,0 +1,24 @@
+<?php
+
+use Drupal\drupal_extractor\Extractors\Entities;
+
+//1°
+function drupal_extractor_preprocess_node (&$variables){
+
+}
+
+//2°
+function drupal_extractor_preprocess_html(&$variables){
+
+}
+
+//3°
+function drupal_extractor_preprocess_page(&$variables){
+
+  $data = Entities\Node::get($variables);
+
+  $variables['node_fields'] = $data;
+
+  var_dump($variables['node_fields']);
+
+}
